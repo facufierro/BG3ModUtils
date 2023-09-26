@@ -1,24 +1,23 @@
 import os
 import shutil
 import json
+import time
 from lxml import etree
-from typing import List, Dict, Any
-from typing import Literal
-from utils.enums import FileType
-from utils.debug import Log
+from debug import Log
+from concurrent.futures import ProcessPoolExecutor
+from typing import Optional, Literal, Tuple, List, Dict
 
 
 class FileManager:
-
     # Creates a directory if it doesn't exist
     @staticmethod
     def create_folder(path):
         if not os.path.exists(path):
             try:
                 os.makedirs(path)
-                logging.debug(f"Created directory {path}")
+                Log.debug(f"Created directory {path}")
             except Exception as e:
-                logging.error(f"Failed to create directory {path}: {e}")
+                Log.error(f"Failed to create directory {path}: {e}")
                 return False
 
     @staticmethod
@@ -27,7 +26,7 @@ class FileManager:
             if os.path.exists(path):
                 shutil.rmtree(path)
         except Exception as e:
-            logging.error(f"An error occurred while deleting folder: {e}")
+            Log.error(f"An error occurred while deleting folder: {e}")
     # Deletes all files and folders in the specified folder
 
     @staticmethod
@@ -38,32 +37,40 @@ class FileManager:
                 try:
                     if os.path.isfile(file_path) or os.path.islink(file_path):
                         os.unlink(file_path)
-                        # logging.debug(f'Successfully deleted {file_path}')
+                        # Log.debug(f'Successfully deleted {file_path}')
                     elif os.path.isdir(file_path):
                         shutil.rmtree(file_path)
-                        # logging.debug(f'Successfully deleted directory {file_path}')
+                        # Log.debug(f'Successfully deleted directory {file_path}')
                 except Exception as e:
-                    logging.error(f'Failed to delete {file_path}. Reason: {e}')
+                    Log.error(f'Failed to delete {file_path}. Reason: {e}')
         except Exception as e:
-            logging.error(f'Failed to clean folder. Reason: {e}')
+            Log.error(f'Failed to clean folder. Reason: {e}')
 
     # Searches for files with the specified names in the specified folder
     @staticmethod
-    def find_files(folder_path, target_filenames: List[str]) -> List[str]:
-        found_files = []
-
+    def find_files(folder_path: str, target_filenames: Optional[List[str]] = None) -> List[str]:
         try:
-            for root, dirs, files in os.walk(folder_path):
-                for filename in files:
-                    if filename in target_filenames:
-                        full_path = os.path.join(root, filename)
-                        found_files.append(full_path)
+            time_start = time.time()
+            found_files = []
 
-            Log.info(f"Found {len(found_files)} files")
+            # First, search the top-level directory without multiprocessing
+            found_files.extend(deep_search((folder_path, target_filenames)))
+
+            MAX_WORKERS = os.cpu_count()
+
+            # Use multiprocessing to search only the immediate subdirectories of folder_path
+            directories_to_search = [d.path for d in os.scandir(folder_path) if d.is_dir()]
+
+            with ProcessPoolExecutor(max_workers=MAX_WORKERS) as executor:
+                args = [(dir_path, target_filenames) for dir_path in directories_to_search]
+                for result in executor.map(deep_search, args):
+                    found_files.extend(result)
+
+            time_end = time.time()
+            Log.success(f"Found {len(found_files)} files in {time_end - time_start} seconds")
+            return found_files
         except Exception as e:
-            Log.error(f"An error occurred while searching for target files: {e}")
-
-        return found_files
+            Log.error(f"An error occurred while searching for files: {e}")
 
     # Searches for folders with the specified names in the specified folder
     @staticmethod
@@ -82,16 +89,13 @@ class FileManager:
     # Creates a file if it doesn't exist
     @staticmethod
     def create_file(path):
-        directory = os.path.dirname(path)
-        if not os.path.exists(directory):
-            FileManager.create_folder(directory)  # You can call the create_directory function here
-
         try:
+            os.makedirs(os.path.dirname(path), exist_ok=True)
             with open(path, 'w') as f:
                 f.write('')  # Create an empty file
-            # logging.debug(f"Created file {path}")
+            # Log.debug(f"Created file {path}")
         except Exception as e:
-            logging.error(f"Failed to create file {path}: {e}")
+            Log.error(f"Failed to create file {path}: {e}")
             return False
 
     @staticmethod
@@ -100,7 +104,7 @@ class FileManager:
             if os.path.exists(path):
                 os.remove(path)
         except Exception as e:
-            logging.error(f"An error occurred while deleting file: {e}")
+            Log.error(f"An error occurred while deleting file: {e}")
     # Saves an object instance to a JSON file
 
     @staticmethod
@@ -111,9 +115,9 @@ class FileManager:
                     json.dump(obj, f)
                 else:
                     json.dump(obj.__dict__, f)
-            # logging.info(f"Saved object instance to {path}")
+            # Log.info(f"Saved object instance to {path}")
         except Exception as e:
-            logging.error(f"Failed to save object instance to {path}: {e}")
+            Log.error(f"Failed to save object instance to {path}: {e}")
 
     # Loads an object instance from a JSON file
     @staticmethod
@@ -127,12 +131,10 @@ class FileManager:
         except FileNotFoundError:
             return {}
         except json.JSONDecodeError:
-            logging.error(f"Failed to decode JSON from {path}")
+            Log.error(f"Failed to decode JSON from {path}")
             return {}
-    # Writes content to a file
 
-    # Writes the specified data to a mod file
-
+    # writes a list of strings to a file
     @staticmethod
     def write_file(file_path: str, content_list: List[str], mode: Literal['a', 'w'] = 'w'):
         try:
@@ -142,15 +144,7 @@ class FileManager:
         except Exception as e:
             print(f"Failed to write to file {file_path} in {mode} mode: {e}")
 
-    # Generates a mod file containing the specified data
-    @staticmethod
-    def generate_mod_file(file_type: FileType, content_list: List[Any] = None):
-        FileManager.clean_folder(file_type.value)
-        FileManager.create_file(file_type.value)
-        FileManager.write_file(file_type, content_list)
-
     # Inserts the specified data after the last node with the specified id in the specified XML file
-
     @staticmethod
     def insert_string_to_xml(xml_file_path, xpath_expr, string_to_insert, namespace=None, position: Literal['first', 'last'] = 'last'):
         # Parse the XML file
@@ -194,6 +188,7 @@ class FileManager:
         # Save the modified XML back to the file
         tree.write(xml_file_path, pretty_print=True, xml_declaration=True, encoding="UTF-8")
 
+    # converts an XML file to a string
     @staticmethod
     def xml_to_string(xml_file_path):
         try:
@@ -206,6 +201,7 @@ class FileManager:
             Log.error(f"Failed to convert XML file to string: {e}")
             return None
 
+    # removes loose strings from an XML file
     @staticmethod
     def remove_loose_strings_from_xml(file_path):
         try:
@@ -275,3 +271,15 @@ class FileManager:
         except Exception as e:
             Log.error(f"An error occurred while getting attribute from XML: {e}")
             return None
+
+
+def deep_search(directory_and_target: Tuple[str, Optional[List[str]]]) -> List[str]:
+    directory, target_filenames = directory_and_target
+    local_found_files = []
+
+    for root, _, files in os.walk(directory):
+        for filename in files:
+            if target_filenames is None or filename in target_filenames:
+                local_found_files.append(os.path.join(root, filename))
+
+    return local_found_files

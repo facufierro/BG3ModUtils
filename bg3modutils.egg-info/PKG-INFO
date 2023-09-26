@@ -1,0 +1,17 @@
+Metadata-Version: 2.1
+Name: bg3modutils
+Version: 0.0.1
+Author: NeuralNine (Florian Dedov)
+Author-email: <mail@neuralnine.com>
+Keywords: python,bg3,baldurs gate,modding bg3,mod bg3,mod baldurs gate
+Classifier: Development Status :: 1 - Planning
+Classifier: Intended Audience :: Developers
+Classifier: Programming Language :: Python :: 3
+Classifier: Operating System :: Microsoft :: Windows
+Description-Content-Type: text/markdown
+License-File: LICENCE
+Requires-Dist: opencv-python
+Requires-Dist: pyautogui
+Requires-Dist: pyaudio
+
+

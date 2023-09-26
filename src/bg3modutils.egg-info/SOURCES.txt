@@ -1,0 +1,15 @@
+LICENCE
+README.md
+pyproject.toml
+setup.cfg
+src/bg3modutils/__init__.py
+src/bg3modutils/debug.py
+src/bg3modutils/enums.py
+src/bg3modutils/file_manager.py
+src/bg3modutils/lslib.py
+src/bg3modutils/mod_manager.py
+src/bg3modutils/paths.py
+src/bg3modutils.egg-info/PKG-INFO
+src/bg3modutils.egg-info/SOURCES.txt
+src/bg3modutils.egg-info/dependency_links.txt
+src/bg3modutils.egg-info/top_level.txt

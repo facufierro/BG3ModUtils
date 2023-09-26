@@ -1,0 +1,9 @@
+LICENCE
+README.md
+pyproject.toml
+setup.py
+bg3modutils.egg-info/PKG-INFO
+bg3modutils.egg-info/SOURCES.txt
+bg3modutils.egg-info/dependency_links.txt
+bg3modutils.egg-info/requires.txt
+bg3modutils.egg-info/top_level.txt
