@@ -14,7 +14,7 @@ class LSLib:
 
             if input_format is None or output_format is None:
                 command_string = [
-                    'D:\\Projects\\Mods\\Baldurs Gate 3\\BG3ModUtils\\src\\bg3modutils\\Tools\\divine.exe',
+                    'src\\bg3modutils\\utils\\ExportTool',
                     "-g",
                     "bg3",
                     "-a",
@@ -32,7 +32,7 @@ class LSLib:
                 ]
             else:
                 command_string = [
-                    Paths.DIVINE_FILE,
+                    'src\\bg3modutils\\utils\\ExportTool',
                     "-g",
                     "bg3",
                     "-a",
