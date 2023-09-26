@@ -48,13 +48,13 @@ class FileManager:
 
     # Searches for files with the specified names in the specified folder
     @staticmethod
-    def find_files(folder_path: str, target_filenames: Optional[List[str]] = None) -> List[str]:
+    def find_files(folder_path: str, target_filenames: Optional[List[str]] = None, target_extensions: Optional[List[str]] = None) -> List[str]:
         try:
             time_start = time.time()
             found_files = []
 
             # First, search the top-level directory without multiprocessing
-            found_files.extend(deep_search((folder_path, target_filenames)))
+            found_files.extend(deep_search((folder_path, target_filenames, target_extensions)))
 
             MAX_WORKERS = os.cpu_count()
 
@@ -62,7 +62,7 @@ class FileManager:
             directories_to_search = [d.path for d in os.scandir(folder_path) if d.is_dir()]
 
             with ProcessPoolExecutor(max_workers=MAX_WORKERS) as executor:
-                args = [(dir_path, target_filenames) for dir_path in directories_to_search]
+                args = [(dir_path, target_filenames, target_extensions) for dir_path in directories_to_search]
                 for result in executor.map(deep_search, args):
                     found_files.extend(result)
 
