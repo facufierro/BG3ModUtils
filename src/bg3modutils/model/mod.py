@@ -1,6 +1,6 @@
 from typing import List
-from model.meta import Meta
-from model.progression import Progression
+from bg3modutils import Meta
+from bg3modutils import Progression
 from utils.lslib import LSLib
 
 

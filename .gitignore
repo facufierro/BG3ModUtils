@@ -2,5 +2,6 @@
 .vscode/settings.json
 .pypirc
 dist/
+/_env
 
 command

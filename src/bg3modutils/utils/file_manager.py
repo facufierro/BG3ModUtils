@@ -3,7 +3,7 @@ import shutil
 import json
 import time
 from lxml import etree
-from debug import Log
+from bg3modutils import Log
 from concurrent.futures import ProcessPoolExecutor
 from typing import Optional, Literal, Tuple, List, Dict
 

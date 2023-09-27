@@ -4,8 +4,8 @@ build-backend = "hatchling.build"
 
 [project]
 name = "bg3modutils"
-version = "0.0.3"
-authors = [{ name = "fierrof", email = "facufierro@gmail.com" }]
+version = "0.0.10"
+authors = [{ name = "fierrof", email = "facufierro@gmail.com" }] 
 description = "Modding tools for Baldur's Gate 3"
 readme = "README.md"
 requires-python = ">=3.7"

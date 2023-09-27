@@ -1,6 +1,6 @@
 import subprocess
-import logging
 from typing import Literal
+from bg3modutils import Log
 
 
 class LSLib:
@@ -58,5 +58,5 @@ class LSLib:
             else:
                 return False
         except Exception as e:
-            logging.error(
+            Log.error(
                 f"An error occurred while executing the lslib command. Reason: {e}")
