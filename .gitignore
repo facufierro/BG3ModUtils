@@ -5,3 +5,4 @@ dist/
 /_env
 
 command
+pyproject.toml

@@ -1,6 +1,7 @@
 import subprocess
 from typing import Literal
-from bg3modutils import Log
+from bg3modutils.utils.debug import Log
+from bg3modutils.utils.paths import Paths
 
 
 class LSLib:
@@ -14,7 +15,7 @@ class LSLib:
 
             if input_format is None or output_format is None:
                 command_string = [
-                    'src\\bg3modutils\\utils\\ExportTool',
+                    f'{Paths.DIVINE_FILE}',
                     "-g",
                     "bg3",
                     "-a",
@@ -32,7 +33,7 @@ class LSLib:
                 ]
             else:
                 command_string = [
-                    'src\\bg3modutils\\utils\\ExportTool',
+                    f'{Paths.DIVINE_FILE}',
                     "-g",
                     "bg3",
                     "-a",
@@ -52,6 +53,7 @@ class LSLib:
                     "-l",
                     "all",
                 ]
+            # Log.debug(f"Executing lslib command: {command_string}")
             result = subprocess.run(command_string)
             if result.returncode == 0:
                 return True

@@ -3,7 +3,7 @@ import shutil
 import json
 import time
 from lxml import etree
-from bg3modutils import Log
+from bg3modutils.utils.debug import Log
 from concurrent.futures import ProcessPoolExecutor
 from typing import Optional, Literal, Tuple, List, Dict
 
@@ -54,7 +54,7 @@ class FileManager:
             found_files = []
 
             # First, search the top-level directory without multiprocessing
-            found_files.extend(deep_search((folder_path, target_filenames, target_extensions)))
+            found_files.extend(deep_search(folder_path, target_filenames, target_extensions))
 
             MAX_WORKERS = os.cpu_count()
 
@@ -273,13 +273,16 @@ class FileManager:
             return None
 
 
-def deep_search(directory_and_target: Tuple[str, Optional[List[str]]]) -> List[str]:
-    directory, target_filenames = directory_and_target
+def deep_search(directory: str, target_filenames: Optional[List[str]], target_extensions: Optional[List[str]]) -> List[str]:
     local_found_files = []
 
     for root, _, files in os.walk(directory):
         for filename in files:
             if target_filenames is None or filename in target_filenames:
                 local_found_files.append(os.path.join(root, filename))
+            elif target_extensions is not None:
+                _, ext = os.path.splitext(filename)
+                if ext in target_extensions:
+                    local_found_files.append(os.path.join(root, filename))
 
     return local_found_files
